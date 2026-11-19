@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+# never commit secrets
+telegram.json
+channels.json
+*.log
+*-state.json
