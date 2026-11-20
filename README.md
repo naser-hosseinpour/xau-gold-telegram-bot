@@ -1,5 +1,7 @@
 # XAU Gold Analysis & Signal Bot (MetaTrader 5 + Telegram)
 
+**English** | [فارسی](README.fa.md)
+
 A Python automation that reads live gold (XAUUSD) prices from a running **MetaTrader 5** terminal, writes a market analysis in Persian, and posts it to a **Telegram** channel every 20–30 minutes during the US session. It also generates rule-based breakout signals with position sizing, back-tests the rules on the terminal's own history, and watches selected public Telegram channels.
 
 > It only **reads** market data. It holds no broker password and contains no order-placing code.
@@ -36,6 +38,42 @@ python analysis.py preview               # print one analysis without posting
 ```
 
 Telegram settings live **outside the repository** in `~/.trader-xau/telegram.json` (see `examples/telegram.example.json`) or in the `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` environment variables. Channels to watch go in `~/.trader-xau/channels.json` (see `examples/channels.example.json`).
+
+## How to use (step by step)
+
+**1. Prepare the computer** (Windows)
+- Install Python 3.12 and MetaTrader 5. Open MT5, log in to your broker account, and make sure gold is in Market Watch.
+- In this folder run `pip install -r requirements.txt`.
+- The default symbol is `XAUUSD.st` (ePlanet). If your broker uses another name, such as `XAUUSD`, pass `--symbol XAUUSD` to `xau.py` and change `SYMBOL` at the top of `analysis.py`.
+
+**2. Create the Telegram bot**
+- In Telegram, message **@BotFather**, send `/newbot` and copy the token it gives you.
+- Add the bot to your channel or group as an **admin** that can post messages.
+- Copy `examples/telegram.example.json` to `~/.trader-xau/telegram.json` (on Windows: `C:\Users\<you>\.trader-xau\telegram.json`) and put in your token and channel (`@channel_name` or the `-100…` id).
+- Run `python xau.py telegram-test`. A test message should appear in the channel.
+
+**3. Check it before going live**
+- `python xau.py price` shows the live gold price from MT5.
+- `python analysis.py preview` prints one full analysis without posting it.
+
+**4. (Optional) Channel watcher**
+- To get an alert when other public Telegram channels go live or post a signal, copy `examples/channels.example.json` to `~/.trader-xau/channels.json` and list the channels.
+- `python channels.py scan` shows how recent posts would be labelled, without posting.
+
+**5. Start everything**
+- Double-click `start-all.cmd`. It opens Telegram and MT5 if they are closed, then starts the supervisor in the background, which runs the analysis bot and the channel watcher and restarts them if they stop.
+- Or run `python supervisor.py` in a terminal.
+- Analyses are posted Monday to Friday, 15:30–00:30 Iran time. Logs are in `~/.trader-xau/`.
+- In the group, anyone can send `gold`, `/gold` or `گلد` to get a fresh analysis (at most once a minute).
+
+**6. Signals and back-test (on demand)**
+- `python xau.py check --balance 1000 --max-loss 10` → today's signal with entry, stop, target and lot size.
+- `python xau.py backtest --max-loss 10` → how the rule did on past data.
+- `python xau.py watch --balance 1000 --max-loss 10` → posts each signal and its result to Telegram.
+
+**Keep in mind**
+- The computer and MT5 must stay on. If MT5 data stops, the bot posts one notice in the channel and carries on when data returns.
+- Never share or commit `telegram.json`; it holds your bot token.
 
 ## Tests
 
